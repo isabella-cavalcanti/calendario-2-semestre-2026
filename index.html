@@ -267,7 +267,7 @@
       <div class="legend-row"><span class="swatch" style="background:var(--status-critical)"></span> Prova</div>
       <div class="legend-row"><span class="swatch" style="background:var(--status-warning)"></span> Atividade avaliativa</div>
       <div class="legend-row"><span class="swatch" style="background:var(--status-serious)"></span> Atividade / entrega / projeto</div>
-      <div class="legend-row"><span class="swatch" style="background:var(--status-good)"></span> Sem aula / informativo</div>
+      <div class="legend-row"><span class="swatch" style="background:var(--status-good)"></span> ★ Sem aula / evento especial</div>
     </div>
     <div class="legend-group">
       <div class="legend-title">Disciplina</div>
@@ -276,6 +276,7 @@
       <div class="legend-row"><span class="badge">MN</span> Métodos numéricos</div>
       <div class="legend-row"><span class="badge">MM</span> Modelagem matemática</div>
       <div class="legend-row"><span class="badge">DS</span> Desenvolvimento de software</div>
+      <div class="legend-row"><span class="badge">TABD</span> Tópicos avançados em bancos de dados</div>
     </div>
   </div>
 
@@ -287,7 +288,7 @@ const TYPE_META = {
   critical: { label: 'Prova', varName: '--status-critical' },
   warning:  { label: 'Atividade avaliativa', varName: '--status-warning' },
   serious:  { label: 'Atividade / entrega / projeto', varName: '--status-serious' },
-  good:     { label: 'Sem aula / informativo', varName: '--status-good' }
+  good:     { label: '★ Sem aula', varName: '--status-good' }
 };
 
 const events = [
@@ -299,23 +300,28 @@ const events = [
   {date:'2026-09-02', sub:'AA', title:'Atividade avaliativa | Análise de algoritmos', type:'warning', start:'18:30', end:'21:00'},
   {date:'2026-09-02', sub:'ED2', title:'Atividade | Estrutura de dados II', type:'serious', start:'19:00', end:'20:00'},
   {date:'2026-09-07', sub:null, title:'Não tem aula', type:'good', start:'19:15', end:'20:15'},
+  {date:'2026-09-08', sub:'TABD', title:'Atividade avaliativa | Tópicos avançados em bancos de dados', type:'warning', start:'', end:''},
   {date:'2026-09-09', sub:'AA', title:'Atividade avaliativa | Análise de algoritmos', type:'warning', start:'18:30', end:'21:00'},
   {date:'2026-09-11', sub:'DS', title:'Atividade avaliativa | Desenvolvimento de software', type:'warning', start:'19:20', end:'21:50'},
   {date:'2026-09-14', sub:'MM', title:'Lista 2 | Modelagem matemática', type:'serious', start:'20:00', end:'21:00'},
   {date:'2026-09-16', sub:'AA', title:'Atividade avaliativa | Análise de algoritmos', type:'warning', start:'18:30', end:'21:00'},
   {date:'2026-09-16', sub:'ED2', title:'Atividade | Estrutura de dados II', type:'serious', start:'19:00', end:'20:00'},
   {date:'2026-09-17', sub:'MN', title:'Entrega atividade | Métodos numéricos', type:'serious', start:'19:20', end:'20:20'},
+  {date:'2026-09-18', sub:'TABD', title:'Atividade avaliativa | Tópicos avançados em bancos de dados', type:'warning', start:'', end:''},
   {date:'2026-09-22', sub:'MM', title:'Entrega projeto | Modelagem matemática', type:'serious', start:'19:00', end:'20:00'},
+  {date:'2026-09-22', sub:'TABD', title:'Revisão | Tópicos avançados em bancos de dados', type:'serious', start:'', end:''},
   {date:'2026-09-23', sub:'AA', title:'Prova 1 | Análise de algoritmos', type:'critical', start:'18:30', end:'19:30'},
   {date:'2026-09-23', sub:'AA', title:'Entrega projeto | Análise de algoritmos', type:'serious', start:'18:30', end:'19:30'},
   {date:'2026-09-23', sub:'ED2', title:'Prova 1 | Estrutura de dados II', type:'critical', start:'19:00', end:'20:00'},
   {date:'2026-09-24', sub:'ED2', title:'Projeto 1 | Estrutura de dados II', type:'serious', start:'19:00', end:'20:00'},
   {date:'2026-09-25', sub:'DS', title:'Atividade avaliativa | Desenvolvimento de software', type:'warning', start:'19:20', end:'21:50'},
+  {date:'2026-09-25', sub:'TABD', title:'Prova | Tópicos avançados em bancos de dados', type:'critical', start:'', end:''},
   {date:'2026-09-28', sub:'MM', title:'Prova 1 | Modelagem matemática', type:'critical', start:'19:00', end:'20:00'},
   {date:'2026-09-28', sub:'DS', title:'Prova 1 | Desenvolvimento de software', type:'critical', start:'19:20', end:'20:20'},
   {date:'2026-09-30', sub:'AA', title:'Atividade avaliativa | Análise de algoritmos', type:'warning', start:'18:30', end:'21:00'},
 
   {date:'2026-10-01', sub:'MN', title:'Prova 1 | Métodos numéricos', type:'critical', start:'19:20', end:'20:20'},
+  {date:'2026-10-06', sub:'TABD', title:'Atividade avaliativa | Tópicos avançados em bancos de dados', type:'warning', start:'', end:''},
   {date:'2026-10-07', sub:'AA', title:'Atividade avaliativa | Análise de algoritmos', type:'warning', start:'18:30', end:'21:00'},
   {date:'2026-10-07', sub:'ED2', title:'Atividade | Estrutura de dados II', type:'serious', start:'19:00', end:'20:00'},
   {date:'2026-10-12', sub:null, title:'Não tem aula', type:'good', start:'19:00', end:''},
@@ -327,6 +333,7 @@ const events = [
   {date:'2026-10-22', sub:'MN', title:'Entrega atividade | Métodos numéricos', type:'serious', start:'19:20', end:'20:20'},
   {date:'2026-10-28', sub:'AA', title:'Atividade avaliativa | Análise de algoritmos', type:'warning', start:'18:30', end:'21:00'},
   {date:'2026-10-29', sub:'ED2', title:'Atividade | Estrutura de dados II', type:'serious', start:'19:00', end:'20:00'},
+  {date:'2026-10-30', sub:'TABD', title:'Projeto | Tópicos avançados em bancos de dados', type:'serious', start:'', end:''},
 
   {date:'2026-11-02', sub:null, title:'Não tem aula', type:'good', start:'19:00', end:'20:00'},
   {date:'2026-11-04', sub:null, title:'Prova integrada', type:'critical', start:'19:20', end:'20:20'},
@@ -335,12 +342,15 @@ const events = [
   {date:'2026-11-09', sub:'DS', title:'Apresentação do projeto | Desenvolvimento de software', type:'serious', start:'19:20', end:'20:20'},
   {date:'2026-11-11', sub:'AA', title:'Atividade avaliativa | Análise de algoritmos', type:'warning', start:'18:30', end:'21:00'},
   {date:'2026-11-16', sub:'MM', title:'Entrega projeto | Modelagem matemática', type:'serious', start:'19:00', end:'20:00'},
+  {date:'2026-11-17', sub:'TABD', title:'Atividade avaliativa | Tópicos avançados em bancos de dados', type:'warning', start:'', end:''},
   {date:'2026-11-18', sub:'AA', title:'Prova 2 | Análise de algoritmos', type:'critical', start:'18:30', end:'19:30'},
   {date:'2026-11-18', sub:'ED2', title:'Prova 2 | Estrutura de dados II', type:'critical', start:'19:00', end:'20:00'},
   {date:'2026-11-19', sub:'ED2', title:'Projeto 2 | Estrutura de dados II', type:'serious', start:'19:00', end:'20:00'},
   {date:'2026-11-19', sub:'MN', title:'Entrega atividade | Métodos numéricos', type:'serious', start:'19:20', end:'20:20'},
+  {date:'2026-11-20', sub:null, title:'Não tem aula', type:'good', start:'', end:''},
   {date:'2026-11-23', sub:'MM', title:'Prova 2 | Modelagem matemática', type:'critical', start:'19:00', end:'20:00'},
   {date:'2026-11-23', sub:'DS', title:'Prova 2 | Desenvolvimento de software', type:'critical', start:'19:20', end:'20:20'},
+  {date:'2026-11-24', sub:'TABD', title:'Prova 2 | Tópicos avançados em bancos de dados', type:'critical', start:'', end:''},
   {date:'2026-11-25', sub:'AA', title:'Entrega projeto | Análise de algoritmos', type:'serious', start:'18:30', end:'19:30'},
   {date:'2026-11-26', sub:'MN', title:'Prova 2 | Métodos numéricos', type:'critical', start:'19:20', end:'20:20'},
 ];
@@ -382,10 +392,14 @@ function renderTabs(){
 function chipHTML(e){
   const meta = TYPE_META[e.type];
   const timeStr = e.start && e.end ? `${e.start}–${e.end}` : (e.start ? `${e.start}` : (e.end ? `até ${e.end}` : ''));
-  const full = `${meta.label}${e.sub ? ' · ' + e.sub : ''} · ${timeStr}`;
-  return `<div class="event" style="--c: var(${meta.varName})" title="${e.title} (${timeStr})">
-    <span class="kicker">${meta.label}</span>
-    ${e.sub ? `<span class="sub">${e.sub}</span> ` : ''}${e.title.split('|').pop().trim() === e.title ? '' : ''}<span class="time">${timeStr}</span>
+  const isNoClass = e.title === 'Não tem aula';
+  const kickerText = e.type === 'good'
+    ? `${isNoClass ? '★ ' : ''}${e.sub ? e.sub + ' · ' : ''}${e.title}`
+    : meta.label;
+  return `<div class="event" style="--c: var(${meta.varName})" title="${e.title}${timeStr ? ' (' + timeStr + ')' : ''}">
+    <span class="kicker">${kickerText}</span>
+    ${e.type === 'good' ? '' : (e.sub ? `<span class="sub">${e.sub}</span> ` : '') + `<span class="time">${timeStr}</span>`}
+    ${e.type === 'good' && timeStr ? `<span class="time">${timeStr}</span>` : ''}
   </div>`;
 }
 
@@ -439,9 +453,11 @@ function renderList(){
       const timeStr = e.start && e.end ? `${e.start}–${e.end}` : (e.start ? e.start : (e.end ? `até ${e.end}` : ''));
       const row = document.createElement('div');
       row.className = 'list-row';
+      const isNoClass = e.title === 'Não tem aula';
+      const kickerText = e.type === 'good' ? (isNoClass ? '★ Sem aula' : 'Evento especial') : meta.label;
       row.innerHTML = `
         <div class="date-col">${dayLabel}</div>
-        <div class="kicker-col" style="color:var(${meta.varName})">${meta.label}</div>
+        <div class="kicker-col" style="color:var(${meta.varName})">${kickerText}</div>
         <div class="title-col">${e.sub ? `<span class="sub">${e.sub}</span>` : ''}${e.title}</div>
         <div class="time-col">${timeStr}</div>`;
       group.appendChild(row);

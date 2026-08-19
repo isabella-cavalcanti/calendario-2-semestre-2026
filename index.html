@@ -14,7 +14,617 @@
     --text-secondary: #52514e;
     --text-muted:     #898781;
     --gridline:       #e1e0d9;
+    --baseline:       #c3c2b7;<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calendário do semestre</title>
+<style>
+  :root {
+    color-scheme: light;
+    --surface-1:      #fcfcfb;
+    --surface-2:      #f4f3f0;
+    --page:           #f9f9f7;
+    --text-primary:   #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted:     #898781;
+    --gridline:       #e1e0d9;
     --baseline:       #c3c2b7;
+    --border:         rgba(11,11,11,0.10);
+    --status-good:     #0ca30c;
+    --status-warning:  #fab219;
+    --status-serious:  #ec835a;
+    --status-critical: #d03b3b;
+    --today-ring: #2a78d6;
+    --cat-1: #2a78d6;
+    --cat-2: #eb6834;
+    --cat-3: #1baf7a;
+    --cat-4: #eda100;
+    --cat-5: #e87ba4;
+    --cat-6: #008300;
+  }
+  [data-theme="dark"] {
+    color-scheme: dark;
+    --surface-1:      #1a1a19;
+    --surface-2:      #232322;
+    --page:           #0d0d0d;
+    --text-primary:   #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted:     #898781;
+    --gridline:       #2c2c2a;
+    --baseline:       #383835;
+    --border:         rgba(255,255,255,0.10);
+    --status-good:     #0ca30c;
+    --status-warning:  #fab219;
+    --status-serious:  #ec835a;
+    --status-critical: #e66767;
+    --today-ring: #3987e5;
+    --cat-1: #3987e5;
+    --cat-2: #d95926;
+    --cat-3: #199e70;
+    --cat-4: #c98500;
+    --cat-5: #d55181;
+    --cat-6: #008300;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--page);
+    color: var(--text-primary);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    padding: 20px 16px 40px;
+  }
+  .wrap { max-width: 1000px; margin: 0 auto; }
+
+  header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  .subtitle { color: var(--text-secondary); font-size: 13px; margin: 0; }
+
+  .controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  button.pill {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    border-radius: 999px;
+    padding: 6px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  button.pill:hover { background: var(--surface-2); }
+  button.pill.active {
+    background: var(--text-primary);
+    color: var(--surface-1);
+    border-color: var(--text-primary);
+  }
+
+  .tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+
+  .panel {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .grid-head {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    margin-bottom: 6px;
+    min-width: 620px;
+  }
+  .grid-head div {
+    text-align: center;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: .03em;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    min-width: 620px;
+  }
+  .day {
+    min-height: 96px;
+    border: 1px solid var(--gridline);
+    border-radius: 8px;
+    padding: 5px;
+    background: var(--surface-1);
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .day.empty { border: none; background: transparent; }
+  .day .num {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+    margin-bottom: 1px;
+  }
+  .day.today { outline: 2px solid var(--today-ring); outline-offset: -2px; }
+  .day.today .num { color: var(--today-ring); font-weight: 700; }
+
+  .event {
+    border-left: 3px solid var(--c);
+    background: color-mix(in oklab, var(--c) 10%, var(--surface-1));
+    border-radius: 3px;
+    padding: 2px 4px;
+    font-size: 9.5px;
+    line-height: 1.25;
+    cursor: default;
+  }
+  .event .kicker {
+    font-weight: 700;
+    color: var(--c);
+    font-size: 8.5px;
+    text-transform: uppercase;
+    letter-spacing: .02em;
+    display: block;
+  }
+  .event .sub {
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .event .time {
+    color: var(--text-muted);
+  }
+  .event[title] { position: relative; }
+
+  .legend {
+    margin-top: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+  .legend-group { display: flex; flex-direction: column; gap: 6px; }
+  .legend-title { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 2px; }
+  .legend-row { display: flex; align-items: center; gap: 6px; }
+  .swatch { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+  .badge {
+    font-weight: 700;
+    font-size: 10px;
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 5px;
+    min-width: 26px;
+    text-align: center;
+  }
+
+  /* list view */
+  .list { display: none; }
+  .list.active { display: block; }
+  .grid-view.hidden { display: none; }
+
+  /* schedule view */
+  .schedule-view { display: none; }
+  .schedule-view.active { display: block; }
+  .schedule-note { font-size: 12px; color: var(--text-secondary); margin: 0 0 12px; }
+  .schedule-table { border-collapse: collapse; width: 640px; }
+  .schedule-table th {
+    text-align: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    padding: 6px 4px 10px;
+    border-bottom: 1px solid var(--gridline);
+  }
+  .schedule-table th:first-child { width: 90px; }
+  .schedule-table td {
+    border: 1px solid var(--gridline);
+    vertical-align: top;
+    padding: 8px;
+    font-size: 11.5px;
+  }
+  .schedule-table td.time-cell {
+    font-weight: 700;
+    font-size: 11px;
+    color: var(--text-secondary);
+    text-align: center;
+    vertical-align: middle;
+    background: var(--surface-2);
+    width: 90px;
+  }
+  .schedule-table td.empty-cell { background: transparent; }
+  .schedule-table .subj-name { font-weight: 700; color: var(--text-primary); display: block; margin-bottom: 3px; }
+  .schedule-table .subj-prof, .schedule-table .subj-room { display: block; color: var(--text-muted); font-size: 10.5px; }
+  .schedule-table td.subj-aa   { background: color-mix(in oklab, var(--cat-1) 12%, var(--surface-1)); border-left: 3px solid var(--cat-1); }
+  .schedule-table td.subj-ds   { background: color-mix(in oklab, var(--cat-2) 12%, var(--surface-1)); border-left: 3px solid var(--cat-2); }
+  .schedule-table td.subj-mm   { background: color-mix(in oklab, var(--cat-3) 12%, var(--surface-1)); border-left: 3px solid var(--cat-3); }
+  .schedule-table td.subj-ed2  { background: color-mix(in oklab, var(--cat-4) 12%, var(--surface-1)); border-left: 3px solid var(--cat-4); }
+  .schedule-table td.subj-tabd { background: color-mix(in oklab, var(--cat-5) 12%, var(--surface-1)); border-left: 3px solid var(--cat-5); }
+  .schedule-table td.subj-mn   { background: color-mix(in oklab, var(--cat-6) 12%, var(--surface-1)); border-left: 3px solid var(--cat-6); }
+  .month-group { margin-bottom: 18px; }
+  .month-group h3 { font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; margin: 0 0 8px; }
+  .list-row {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding: 7px 4px;
+    border-bottom: 1px solid var(--gridline);
+    font-size: 13px;
+  }
+  .list-row .date-col { width: 90px; flex-shrink: 0; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+  .list-row .kicker-col { width: 96px; flex-shrink: 0; font-weight: 700; font-size: 11px; text-transform: uppercase; }
+  .list-row .title-col { flex: 1; }
+  .list-row .title-col .sub { font-weight: 700; margin-right: 4px; }
+  .list-row .time-col { color: var(--text-muted); font-size: 12px; white-space: nowrap; }
+
+  footer { margin-top: 20px; font-size: 11px; color: var(--text-muted); text-align: center; }
+
+  .scroll-hint { display: none; font-size: 11px; color: var(--text-muted); margin-bottom: 8px; }
+
+  @media (max-width: 680px) {
+    body { padding: 14px 10px 30px; }
+    h1 { font-size: 17px; }
+    .scroll-hint { display: block; }
+    .tabs { gap: 5px; }
+    button.pill { padding: 6px 10px; font-size: 11.5px; }
+
+    .list-row {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      grid-template-areas: "date kicker time" "title title title";
+      column-gap: 8px;
+      row-gap: 3px;
+      align-items: baseline;
+      padding: 9px 4px;
+    }
+    .list-row .date-col { grid-area: date; width: auto; font-weight: 700; color: var(--text-primary); font-size: 12px; }
+    .list-row .kicker-col { grid-area: kicker; width: auto; font-size: 9.5px; }
+    .list-row .time-col { grid-area: time; width: auto; font-size: 11px; text-align: right; }
+    .list-row .title-col { grid-area: title; font-size: 12.5px; }
+
+    .controls { gap: 6px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Calendário do semestre</h1>
+      <p class="subtitle">Provas, atividades e entregas — agosto a novembro de 2026</p>
+    </div>
+    <div class="controls">
+      <button class="pill" id="viewCalendar" onclick="setView('grid')">Calendário</button>
+      <button class="pill" id="viewList" onclick="setView('list')">Lista</button>
+      <button class="pill" id="viewSchedule" onclick="setView('schedule')">Horário</button>
+      <button class="pill" id="themeToggle" onclick="toggleTheme()">Modo escuro</button>
+    </div>
+  </header>
+
+  <div id="gridView" class="grid-view">
+    <div class="tabs" id="tabs"></div>
+    <p class="scroll-hint">↔ arraste pra o lado pra ver a semana toda</p>
+    <div class="panel">
+      <div class="grid-head">
+        <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
+      </div>
+      <div class="grid" id="grid"></div>
+    </div>
+  </div>
+
+  <div id="listView" class="list">
+    <div class="panel" id="listPanel"></div>
+  </div>
+
+  <div id="scheduleView" class="schedule-view">
+    <p class="scroll-hint">↔ arraste pra o lado pra ver a semana toda</p>
+    <div class="panel">
+      <p class="schedule-note">Grade fixa das aulas · 2º semestre de 2026. Em semanas com prova, entrega, "sem aula" ou eventos especiais, a aula normal é substituída — confira no calendário.</p>
+      <table class="schedule-table" id="scheduleTable"></table>
+    </div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-group">
+      <div class="legend-title">Tipo de evento</div>
+      <div class="legend-row"><span class="swatch" style="background:var(--status-critical)"></span> Prova</div>
+      <div class="legend-row"><span class="swatch" style="background:var(--status-warning)"></span> Atividade avaliativa</div>
+      <div class="legend-row"><span class="swatch" style="background:var(--status-serious)"></span> Atividade / entrega / projeto</div>
+      <div class="legend-row"><span class="swatch" style="background:var(--status-good)"></span> ★ Sem aula / evento especial</div>
+    </div>
+    <div class="legend-group">
+      <div class="legend-title">Disciplina</div>
+      <div class="legend-row"><span class="badge">AA</span> Análise de algoritmos</div>
+      <div class="legend-row"><span class="badge">ED2</span> Estrutura de dados II</div>
+      <div class="legend-row"><span class="badge">MN</span> Métodos numéricos</div>
+      <div class="legend-row"><span class="badge">MM</span> Modelagem matemática</div>
+      <div class="legend-row"><span class="badge">DS</span> Desenvolvimento de software</div>
+      <div class="legend-row"><span class="badge">TABD</span> Tópicos avançados em bancos de dados</div>
+    </div>
+  </div>
+
+  <footer>Passe o mouse sobre um evento para ver o horário completo · dados baseados no calendário que você compartilhou</footer>
+</div>
+
+<script>
+const TYPE_META = {
+  critical: { label: 'Prova', varName: '--status-critical' },
+  warning:  { label: 'Atividade avaliativa', varName: '--status-warning' },
+  serious:  { label: 'Atividade / entrega / projeto', varName: '--status-serious' },
+  good:     { label: '★ Sem aula', varName: '--status-good' }
+};
+
+const events = [
+  {date:'2026-08-19', sub:'AA', title:'Atividade avaliativa | Análise de algoritmos', type:'warning', start:'18:30', end:'21:00'},
+  {date:'2026-08-26', sub:'AA', title:'Atividade avaliativa | Análise de algoritmos', type:'warning', start:'18:30', end:'21:00'},
+  {date:'2026-08-27', sub:'MN', title:'Entrega atividade | Métodos numéricos', type:'serious', start:'19:20', end:'20:20'},
+  {date:'2026-08-31', sub:'MM', title:'Lista 1 | Modelagem matemática', type:'serious', start:'20:00', end:'21:00'},
+
+  {date:'2026-09-02', sub:'AA', title:'Atividade avaliativa | Análise de algoritmos', type:'warning', start:'18:30', end:'21:00'},
+  {date:'2026-09-02', sub:'ED2', title:'Atividade | Estrutura de dados II', type:'serious', start:'19:00', end:'20:00'},
+  {date:'2026-09-07', sub:null, title:'Não tem aula', type:'good', start:'19:15', end:'20:15'},
+  {date:'2026-09-08', sub:'TABD', title:'Atividade avaliativa | Tópicos avançados em bancos de dados', type:'warning', start:'', end:''},
+  {date:'2026-09-09', sub:'AA', title:'Atividade avaliativa | Análise de algoritmos', type:'warning', start:'18:30', end:'21:00'},
+  {date:'2026-09-11', sub:'DS', title:'Atividade avaliativa | Desenvolvimento de software', type:'warning', start:'19:20', end:'21:50'},
+  {date:'2026-09-14', sub:'MM', title:'Lista 2 | Modelagem matemática', type:'serious', start:'20:00', end:'21:00'},
+  {date:'2026-09-16', sub:'AA', title:'Atividade avaliativa | Análise de algoritmos', type:'warning', start:'18:30', end:'21:00'},
+  {date:'2026-09-16', sub:'ED2', title:'Atividade | Estrutura de dados II', type:'serious', start:'19:00', end:'20:00'},
+  {date:'2026-09-17', sub:'MN', title:'Entrega atividade | Métodos numéricos', type:'serious', start:'19:20', end:'20:20'},
+  {date:'2026-09-18', sub:'TABD', title:'Atividade avaliativa | Tópicos avançados em bancos de dados', type:'warning', start:'', end:''},
+  {date:'2026-09-22', sub:'MM', title:'Entrega projeto | Modelagem matemática', type:'serious', start:'19:00', end:'20:00'},
+  {date:'2026-09-22', sub:'TABD', title:'Revisão | Tópicos avançados em bancos de dados', type:'serious', start:'', end:''},
+  {date:'2026-09-23', sub:'AA', title:'Prova 1 | Análise de algoritmos', type:'critical', start:'18:30', end:'19:30'},
+  {date:'2026-09-23', sub:'AA', title:'Entrega projeto | Análise de algoritmos', type:'serious', start:'18:30', end:'19:30'},
+  {date:'2026-09-23', sub:'ED2', title:'Prova 1 | Estrutura de dados II', type:'critical', start:'19:00', end:'20:00'},
+  {date:'2026-09-24', sub:'ED2', title:'Projeto 1 | Estrutura de dados II', type:'serious', start:'19:00', end:'20:00'},
+  {date:'2026-09-25', sub:'DS', title:'Atividade avaliativa | Desenvolvimento de software', type:'warning', start:'19:20', end:'21:50'},
+  {date:'2026-09-25', sub:'TABD', title:'Prova | Tópicos avançados em bancos de dados', type:'critical', start:'', end:''},
+  {date:'2026-09-28', sub:'MM', title:'Prova 1 | Modelagem matemática', type:'critical', start:'19:00', end:'20:00'},
+  {date:'2026-09-28', sub:'DS', title:'Prova 1 | Desenvolvimento de software', type:'critical', start:'19:20', end:'20:20'},
+  {date:'2026-09-30', sub:'AA', title:'Atividade avaliativa | Análise de algoritmos', type:'warning', start:'18:30', end:'21:00'},
+
+  {date:'2026-10-01', sub:'MN', title:'Prova 1 | Métodos numéricos', type:'critical', start:'19:20', end:'20:20'},
+  {date:'2026-10-06', sub:'TABD', title:'Atividade avaliativa | Tópicos avançados em bancos de dados', type:'warning', start:'', end:''},
+  {date:'2026-10-07', sub:'AA', title:'Atividade avaliativa | Análise de algoritmos', type:'warning', start:'18:30', end:'21:00'},
+  {date:'2026-10-07', sub:'ED2', title:'Atividade | Estrutura de dados II', type:'serious', start:'19:00', end:'20:00'},
+  {date:'2026-10-12', sub:null, title:'Não tem aula', type:'good', start:'19:00', end:''},
+  {date:'2026-10-13', sub:null, title:'Não tem aula', type:'good', start:'', end:'20:00'},
+  {date:'2026-10-14', sub:null, title:'Semana da tecnologia', type:'good', start:'19:20', end:'20:20'},
+  {date:'2026-10-15', sub:null, title:'Semana da tecnologia', type:'good', start:'19:20', end:'20:20'},
+  {date:'2026-10-16', sub:null, title:'Semana da tecnologia', type:'good', start:'19:20', end:'20:20'},
+  {date:'2026-10-21', sub:'AA', title:'Atividade avaliativa | Análise de algoritmos', type:'warning', start:'18:30', end:'21:00'},
+  {date:'2026-10-22', sub:'MN', title:'Entrega atividade | Métodos numéricos', type:'serious', start:'19:20', end:'20:20'},
+  {date:'2026-10-28', sub:'AA', title:'Atividade avaliativa | Análise de algoritmos', type:'warning', start:'18:30', end:'21:00'},
+  {date:'2026-10-29', sub:'ED2', title:'Atividade | Estrutura de dados II', type:'serious', start:'19:00', end:'20:00'},
+  {date:'2026-10-30', sub:'TABD', title:'Projeto | Tópicos avançados em bancos de dados', type:'serious', start:'', end:''},
+
+  {date:'2026-11-02', sub:null, title:'Não tem aula', type:'good', start:'19:00', end:'20:00'},
+  {date:'2026-11-04', sub:null, title:'Prova integrada', type:'critical', start:'19:20', end:'20:20'},
+  {date:'2026-11-05', sub:'MN', title:'Entrega atividade | Métodos numéricos', type:'serious', start:'19:20', end:'20:20'},
+  {date:'2026-11-06', sub:'DS', title:'Atividade avaliativa | Desenvolvimento de software', type:'warning', start:'19:20', end:'21:50'},
+  {date:'2026-11-09', sub:'DS', title:'Apresentação do projeto | Desenvolvimento de software', type:'serious', start:'19:20', end:'20:20'},
+  {date:'2026-11-11', sub:'AA', title:'Atividade avaliativa | Análise de algoritmos', type:'warning', start:'18:30', end:'21:00'},
+  {date:'2026-11-16', sub:'MM', title:'Entrega projeto | Modelagem matemática', type:'serious', start:'19:00', end:'20:00'},
+  {date:'2026-11-17', sub:'TABD', title:'Atividade avaliativa | Tópicos avançados em bancos de dados', type:'warning', start:'', end:''},
+  {date:'2026-11-18', sub:'AA', title:'Prova 2 | Análise de algoritmos', type:'critical', start:'18:30', end:'19:30'},
+  {date:'2026-11-18', sub:'ED2', title:'Prova 2 | Estrutura de dados II', type:'critical', start:'19:00', end:'20:00'},
+  {date:'2026-11-19', sub:'ED2', title:'Projeto 2 | Estrutura de dados II', type:'serious', start:'19:00', end:'20:00'},
+  {date:'2026-11-19', sub:'MN', title:'Entrega atividade | Métodos numéricos', type:'serious', start:'19:20', end:'20:20'},
+  {date:'2026-11-20', sub:null, title:'Não tem aula', type:'good', start:'', end:''},
+  {date:'2026-11-23', sub:'MM', title:'Prova 2 | Modelagem matemática', type:'critical', start:'19:00', end:'20:00'},
+  {date:'2026-11-23', sub:'DS', title:'Prova 2 | Desenvolvimento de software', type:'critical', start:'19:20', end:'20:20'},
+  {date:'2026-11-24', sub:'TABD', title:'Prova 2 | Tópicos avançados em bancos de dados', type:'critical', start:'', end:''},
+  {date:'2026-11-25', sub:'AA', title:'Entrega projeto | Análise de algoritmos', type:'serious', start:'18:30', end:'19:30'},
+  {date:'2026-11-26', sub:'MN', title:'Prova 2 | Métodos numéricos', type:'critical', start:'19:20', end:'20:20'},
+];
+
+const MONTHS = [
+  {y:2026, m:8,  label:'Ago 2026'},
+  {y:2026, m:9,  label:'Set 2026'},
+  {y:2026, m:10, label:'Out 2026'},
+  {y:2026, m:11, label:'Nov 2026'},
+];
+const DOW = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+
+function pad(n){ return String(n).padStart(2,'0'); }
+function ymd(y,m,d){ return `${y}-${pad(m)}-${pad(d)}`; }
+
+function eventsByDate(dateStr){
+  return events.filter(e => e.date === dateStr);
+}
+
+let currentMonthIdx = 0;
+(function pickDefaultMonth(){
+  const today = new Date();
+  const idx = MONTHS.findIndex(mo => mo.y === today.getFullYear() && mo.m === today.getMonth()+1);
+  currentMonthIdx = idx >= 0 ? idx : 0;
+})();
+
+function renderTabs(){
+  const tabs = document.getElementById('tabs');
+  tabs.innerHTML = '';
+  MONTHS.forEach((mo, i) => {
+    const b = document.createElement('button');
+    b.className = 'pill' + (i === currentMonthIdx ? ' active' : '');
+    b.textContent = mo.label;
+    b.onclick = () => { currentMonthIdx = i; renderTabs(); renderGrid(); };
+    tabs.appendChild(b);
+  });
+}
+
+function chipHTML(e){
+  const meta = TYPE_META[e.type];
+  const timeStr = e.start && e.end ? `${e.start}–${e.end}` : (e.start ? `${e.start}` : (e.end ? `até ${e.end}` : ''));
+  const isNoClass = e.title === 'Não tem aula';
+  const kickerText = e.type === 'good'
+    ? `${isNoClass ? '★ ' : ''}${e.sub ? e.sub + ' · ' : ''}${e.title}`
+    : meta.label;
+  return `<div class="event" style="--c: var(${meta.varName})" title="${e.title}${timeStr ? ' (' + timeStr + ')' : ''}">
+    <span class="kicker">${kickerText}</span>
+    ${e.type === 'good' ? '' : (e.sub ? `<span class="sub">${e.sub}</span> ` : '') + `<span class="time">${timeStr}</span>`}
+    ${e.type === 'good' && timeStr ? `<span class="time">${timeStr}</span>` : ''}
+  </div>`;
+}
+
+function renderGrid(){
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  const {y, m} = MONTHS[currentMonthIdx];
+  const firstDow = new Date(y, m-1, 1).getDay();
+  const daysInMonth = new Date(y, m, 0).getDate();
+  const today = new Date();
+  const todayStr = ymd(today.getFullYear(), today.getMonth()+1, today.getDate());
+
+  for (let i=0; i<firstDow; i++){
+    const cell = document.createElement('div');
+    cell.className = 'day empty';
+    grid.appendChild(cell);
+  }
+  for (let d=1; d<=daysInMonth; d++){
+    const dateStr = ymd(y,m,d);
+    const cell = document.createElement('div');
+    cell.className = 'day' + (dateStr === todayStr ? ' today' : '');
+    const num = document.createElement('div');
+    num.className = 'num';
+    num.textContent = d;
+    cell.appendChild(num);
+    eventsByDate(dateStr).forEach(e => {
+      cell.insertAdjacentHTML('beforeend', chipHTML(e));
+    });
+    grid.appendChild(cell);
+  }
+}
+
+function renderList(){
+  const panel = document.getElementById('listPanel');
+  panel.innerHTML = '';
+  const byMonth = {};
+  events.slice().sort((a,b) => a.date.localeCompare(b.date)).forEach(e => {
+    const mo = e.date.slice(0,7);
+    (byMonth[mo] = byMonth[mo] || []).push(e);
+  });
+  const monthNames = {'08':'Agosto','09':'Setembro','10':'Outubro','11':'Novembro'};
+  Object.keys(byMonth).sort().forEach(mo => {
+    const [y, mm] = mo.split('-');
+    const group = document.createElement('div');
+    group.className = 'month-group';
+    group.innerHTML = `<h3>${monthNames[mm] || mo} ${y}</h3>`;
+    byMonth[mo].forEach(e => {
+      const meta = TYPE_META[e.type];
+      const d = new Date(e.date + 'T00:00:00');
+      const dayLabel = `${DOW[d.getDay()]} ${d.getDate()}`;
+      const timeStr = e.start && e.end ? `${e.start}–${e.end}` : (e.start ? e.start : (e.end ? `até ${e.end}` : ''));
+      const row = document.createElement('div');
+      row.className = 'list-row';
+      const isNoClass = e.title === 'Não tem aula';
+      const kickerText = e.type === 'good' ? (isNoClass ? '★ Sem aula' : 'Evento especial') : meta.label;
+      row.innerHTML = `
+        <div class="date-col">${dayLabel}</div>
+        <div class="kicker-col" style="color:var(${meta.varName})">${kickerText}</div>
+        <div class="title-col">${e.sub ? `<span class="sub">${e.sub}</span>` : ''}${e.title}</div>
+        <div class="time-col">${timeStr}</div>`;
+      group.appendChild(row);
+    });
+    panel.appendChild(group);
+  });
+}
+
+const SUBJ_CLASS = { AA:'subj-aa', DS:'subj-ds', MM:'subj-mm', ED2:'subj-ed2', TABD:'subj-tabd', MN:'subj-mn' };
+
+const SCHEDULE_ROWS = [
+  { time: '18:30–19:20', cells: {
+      seg:null, ter:null,
+      qua: { sub:'AA', name:'Análise de algoritmos', prof:'Murilo Gleyson Gazzola', room:'Sala 11', rowspan:2 },
+      qui:null, sex:null } },
+  { time: '19:20–21:00', cells: {
+      seg: { sub:'DS', name:'Desenvolvimento de software', prof:'Patricia Bonezi Nunes da Mota', room:'Auditório' },
+      ter: { sub:'MM', name:'Modelagem matemática', prof:'Julio Ardito', room:'Sala 11' },
+      qua: 'skip',
+      qui: { sub:'ED2', name:'Estrutura de dados II', prof:'Cristiane Camilo Hernandez', room:'Sala 11' },
+      sex: { sub:'DS', name:'Desenvolvimento de software', prof:'Patricia Bonezi Nunes da Mota', room:'Sala 11' } } },
+  { time: '21:10–22:50', cells: {
+      seg: { sub:'MM', name:'Modelagem matemática', prof:'Julio Ardito', room:'Sala 11' },
+      ter: { sub:'TABD', name:'Tópicos avançados em bancos de dados', prof:'Alberto Messias', room:'Sala 11' },
+      qua: { sub:'ED2', name:'Estrutura de dados II', prof:'Cristiane Camilo Hernandez', room:'Sala 11' },
+      qui: { sub:'MN', name:'Métodos numéricos', prof:'Vitor Alex Oliveira Alves', room:'Sala 11' },
+      sex: { sub:'TABD', name:'Tópicos avançados em bancos de dados', prof:'Alberto Messias', room:'Sala 10' } } },
+];
+const SCHEDULE_DAYS = ['seg','ter','qua','qui','sex'];
+
+function scheduleCellHTML(cell){
+  if (!cell) return '<td class="empty-cell"></td>';
+  const cls = SUBJ_CLASS[cell.sub] || '';
+  const rowspanAttr = cell.rowspan ? ` rowspan="${cell.rowspan}"` : '';
+  return `<td class="${cls}"${rowspanAttr}>
+    <span class="subj-name">${cell.name}</span>
+    <span class="subj-prof">${cell.prof}</span>
+    <span class="subj-room">${cell.room}</span>
+  </td>`;
+}
+
+function renderSchedule(){
+  const table = document.getElementById('scheduleTable');
+  let html = '<thead><tr><th>Horário</th><th>Seg</th><th>Ter</th><th>Qua</th><th>Qui</th><th>Sex</th></tr></thead><tbody>';
+  SCHEDULE_ROWS.forEach(row => {
+    html += `<tr><td class="time-cell">${row.time}</td>`;
+    SCHEDULE_DAYS.forEach(day => {
+      const cell = row.cells[day];
+      if (cell === 'skip') return;
+      html += scheduleCellHTML(cell);
+    });
+    html += '</tr>';
+  });
+  html += '</tbody>';
+  table.innerHTML = html;
+}
+
+let currentView = window.innerWidth < 680 ? 'list' : 'grid';
+function applyViewState(){
+  document.getElementById('gridView').classList.toggle('hidden', currentView !== 'grid');
+  document.getElementById('listView').classList.toggle('active', currentView === 'list');
+  document.getElementById('scheduleView').classList.toggle('active', currentView === 'schedule');
+  document.getElementById('viewCalendar').classList.toggle('active', currentView === 'grid');
+  document.getElementById('viewList').classList.toggle('active', currentView === 'list');
+  document.getElementById('viewSchedule').classList.toggle('active', currentView === 'schedule');
+}
+function setView(view){
+  currentView = view;
+  applyViewState();
+}
+
+function toggleTheme(){
+  const isDark = document.body.getAttribute('data-theme') === 'dark';
+  document.body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  document.getElementById('themeToggle').textContent = isDark ? 'Modo escuro' : 'Modo claro';
+}
+
+renderTabs();
+renderGrid();
+renderList();
+renderSchedule();
+applyViewState();
+</script>
+</body>
+</html>
+
     --border:         rgba(11,11,11,0.10);
     --status-good:     #0ca30c;
     --status-warning:  #fab219;
